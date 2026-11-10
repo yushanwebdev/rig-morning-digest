@@ -29,6 +29,7 @@ describe('readNight', () => {
     expect(night?.night).toBe('2026-10-28');
     expect(night?.rows).toHaveLength(5);
     expect(night?.badLines).toBe(1);
+    expect(night?.counts).toEqual({ ok: 10, retry: 4, fail: 1 });
     expect(night?.rows.map((row) => row.job)).toEqual([
       'digest/render',
       'fixtures/refresh',
@@ -36,6 +37,11 @@ describe('readNight', () => {
       'notes/backup',
       'rig/rotate-logs',
     ]);
+  });
+
+  it('counts every valid line of 2026-10-27 as ok', () => {
+    const night = readNight('runs', '2026-10-27');
+    expect(night?.counts).toEqual({ ok: 7, retry: 0, fail: 0 });
   });
 
   it('summarizes fixtures/refresh: 4 runs, 3 retries, last status ok', () => {
@@ -78,6 +84,11 @@ describe('readNight', () => {
 
   it('reads an empty file as no runs and no bad lines', () => {
     const night = readNight(tempDirWithFile('2026-01-02', ''), '2026-01-02');
-    expect(night).toEqual({ night: '2026-01-02', rows: [], badLines: 0 });
+    expect(night).toEqual({
+      night: '2026-01-02',
+      rows: [],
+      counts: { ok: 0, retry: 0, fail: 0 },
+      badLines: 0,
+    });
   });
 });

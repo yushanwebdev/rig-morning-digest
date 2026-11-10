@@ -4,6 +4,16 @@
 /** A run's terminal status, exactly as written in the log. */
 export type DigestStatus = 'ok' | 'retry' | 'fail';
 
+/** How many valid log lines of the night had each terminal status. */
+export type DigestCounts = {
+  /** Lines with `status: "ok"`. */
+  ok: number;
+  /** Lines with `status: "retry"`. */
+  retry: number;
+  /** Lines with `status: "fail"`. */
+  fail: number;
+};
+
 /** One job's night, summarized: one row per distinct `job` in the night's log. */
 export type DigestRow = {
   /** The job name, exactly as in the log (`job`). */
@@ -36,6 +46,11 @@ export type DigestNight = {
   night: string;
   /** One row per job, sorted by `job` ascending in plain, locale-independent string order. */
   rows: DigestRow[];
+  /**
+   * Totals over the night's valid lines, one per `status`. The sum equals the number of lines
+   * that produced a {@link DigestRow} entry; bad lines are counted in `badLines`, not here.
+   */
+  counts: DigestCounts;
   /** Non-blank lines that were not a valid run object. Counted and skipped; never thrown. */
   badLines: number;
 };
@@ -45,12 +60,13 @@ export type DigestNight = {
  *
  * Contract:
  * - Returns `null` when the file does not exist, so the caller can answer 404. An existing but
- *   empty file returns `{ night, rows: [], badLines: 0 }` (rendered as "nothing ran").
+ *   empty file returns `{ night, rows: [], counts: { ok: 0, retry: 0, fail: 0 }, badLines: 0 }`
+ *   (rendered as "nothing ran").
  * - The log is JSONL: one JSON object per line with `at` (string), `job` (string),
  *   `status` (`ok | retry | fail`), `owner` (string or `null`) and optional `error` (string).
  *   Lines are grouped by `job`; `runs`, `retries`, `lastStatus`, `lastError`, `firstAt` and
  *   `lastAt` summarize the job's lines in file order (each field's rule is documented on
- *   {@link DigestRow}).
+ *   {@link DigestRow}). `counts` totals those lines by `status`.
  * - A non-blank line that does not parse as JSON, or parses but is not a run object (missing or
  *   non-string `at`/`job`, `status` outside the union, `owner` neither a string nor `null`, or a
  *   non-string `error`), is skipped and counted in `badLines`. It is never thrown: one bad line
