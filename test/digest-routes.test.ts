@@ -103,7 +103,7 @@ describe('GET /api/digest/:night', () => {
     const body = (await res.json()) as DigestNight;
 
     expect(res.status).toBe(200);
-    expect(body).toEqual({ night: '2026-11-02', rows: [], badLines: 0 });
+    expect(body).toEqual({ night: '2026-11-02', rows: [], badLines: 0, counts: { ok: 0, retry: 0, fail: 0 } });
   });
 
   it('counts a bad line and still returns the rows', async () => {
