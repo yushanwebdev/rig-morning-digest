@@ -3,3 +3,7 @@ var/
 .env
 *.png
 .claude/skills
+
+# harness pointers (local, not shared)
+.opencode/
+.challenge-log.md
