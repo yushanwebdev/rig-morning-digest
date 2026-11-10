@@ -1,5 +1,9 @@
 import type { Status } from '../status.js';
 
+function Count({ value }: { value: number | undefined }) {
+  return value === undefined ? <span class="mute">—</span> : <>{String(value)}</>;
+}
+
 export function StatusBoard({ status }: { status: Status }) {
   return (
     <>
@@ -20,7 +24,15 @@ export function StatusBoard({ status }: { status: Status }) {
       ) : (
         <ul>
           {status.nights.map((n) => (
-            <li>{n}</li>
+            <li>
+              <a href={`/digest/${n.night}`}>{n.night}</a>
+              {' · '}
+              <span class="mute">ok</span> <Count value={n.counts?.ok} />
+              {' · '}
+              <span class="mute">retry</span> <Count value={n.counts?.retry} />
+              {' · '}
+              <span class="mute">fail</span> <Count value={n.counts?.fail} />
+            </li>
           ))}
         </ul>
       )}
